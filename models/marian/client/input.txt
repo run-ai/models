@@ -1,0 +1,5 @@
+Daniel Dunklin (January 14, 1790 – August 25, 1844) was the fifth Governor of Missouri, serving from 1832 to 1836.
+The master branch documentation tracks the upcoming, under-development release and so may not be accurate for the current release of Triton. See the r20.12 documentation for the current release.
+The Triton Release Notes and Support Matrix indicate the required versions of the NVIDIA Driver and CUDA, and also describe supported GPUs.
+Understanding and optimizing performance is an important part of deploying your models. The Triton project provides the Performance Analyzer and the Model Analyzer to help your optimization efforts.
+As part of your deployment strategy you may want to explicitly manage what models are available by loading and unloading models from a running Triton server.
