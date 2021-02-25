@@ -21,14 +21,32 @@ class Timer:
         print(f"{self._msg} in {int((end - self._start).total_seconds() * 1000)} ms")
 
 def run(args, lines):
-    # open connection
-    ws = create_connection("ws://{}:{}/translate".format(args.hostname, args.port))
+    ws = None
+
+    def connect():
+        nonlocal ws
+        ws = create_connection("ws://{}:{}/translate".format(args.hostname, args.port))
+
+    def close():
+        nonlocal ws
+        ws.close()
+
+    if args.connect_per == 'process':
+        connect()
 
     def translate(batch):
+        nonlocal ws
+
+        if args.connect_per == 'request':
+            connect()
+
         with Timer(f"Process {os.getpid()} translated batch of {args.batch_size} sentences"):
             ws.send(batch)
             result = ws.recv()
             # print(result.rstrip())
+
+        if args.connect_per == 'request':
+            close()
 
     count = 0
     batch = ""
@@ -52,8 +70,8 @@ def run(args, lines):
 
             request += 1
 
-    # close connection
-    ws.close()
+    if args.connect_per == 'process':
+        close()
 
 if __name__ == "__main__":
     # handle command-line options
@@ -63,12 +81,13 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--batch-size", type=int, default=5)
     parser.add_argument("--processes", type=int, default=5)
     parser.add_argument("--requests", type=int, default=20)
+    parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
     args = parser.parse_args()
 
     # read text lines
     lines = sys.stdin.readlines()
 
-    print(f"Launching {args.processes} processes with {args.requests} requests each")
+    print(f"Launching {args.processes} processes with {args.requests} requests each; connecting per {args.connect_per}.")
 
     # create child processes
     processes = [Process(target=run, args=(args, lines)) for _ in range(args.processes)]

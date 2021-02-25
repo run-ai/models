@@ -17,3 +17,4 @@ You can pass the following arguments:
 - `--port` - Configure the port of the server; default is 8888.
 - `--processes` - The number of launched client processes; default is 5.
 - `--requests` - The number of requests to be sent from each process; default is 20.
+- `--connect-per` (options: `process`, `request`) - Create a socket once per process or for every request; default is `request`.
