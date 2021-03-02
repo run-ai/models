@@ -1,7 +1,8 @@
 # Run:AI Model Zoo
 
-## Models
+## Inference Models
 
-| Name | Framework | URL |
-|-|-|-|
-| Marian | [Marian NMT](https://marian-nmt.github.io/) | [models/marian](models/marian) |
+| Name | Framework |
+|-|-|
+| [Marian](models/marian) | [Marian NMT](https://marian-nmt.github.io/) |
+| [Triton](models/triton) | [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server/) |
