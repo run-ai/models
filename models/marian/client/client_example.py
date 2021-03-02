@@ -3,6 +3,7 @@ from __future__ import print_function, unicode_literals, division
 import os
 import datetime
 import sys
+import random
 import argparse
 from multiprocessing import Process
 
@@ -10,15 +11,20 @@ from multiprocessing import Process
 from websocket import create_connection
 
 class Timer:
-    def __init__(self, msg):
+    def __init__(self, msg, timestamp=True):
         self._msg = msg
+        self._timestamp = timestamp
 
     def __enter__(self):
         self._start = datetime.datetime.now()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         end = datetime.datetime.now()
-        print(f"{self._msg} in {int((end - self._start).total_seconds() * 1000)} ms")
+        ms = int((end - self._start).total_seconds() * 1000)
+        msg = f"{self._msg} in {ms} ms" if isinstance(self._msg, str) else self._msg(ms)
+        if self._timestamp:
+            msg = f"{end.strftime('%H:%M:%S.%f')[:-3]}\t{msg}"
+        print(msg)
 
 def run(args, lines):
     ws = None
@@ -40,7 +46,7 @@ def run(args, lines):
         if args.connect_per == 'request':
             connect()
 
-        with Timer(f"Process {os.getpid()} translated batch of {args.batch_size} sentences"):
+        with Timer(f"Process (pid {os.getpid()}) translated a single request of {args.batch_size} sentences"):
             ws.send(batch)
             result = ws.recv()
             # print(result.rstrip())
@@ -48,27 +54,18 @@ def run(args, lines):
         if args.connect_per == 'request':
             close()
 
-    count = 0
-    batch = ""
-    request = 0
-
-    with Timer(f"** Process {os.getpid()} translated {args.requests} requests"):
+    with Timer(f"** Process (pid {os.getpid()}) translated {args.requests} requests"):
+        request = 0
         while request < args.requests or args.requests == -1:
-            for line in lines:
-                count += 1
-                batch += line.decode('utf-8') if sys.version_info < (3, 0) else line
-                if count == args.batch_size:
-                    # translate the batch
-                    translate(batch)
-
-                    count = 0
-                    batch = ""
-
-            if count:
-                # translate the remaining sentences
-                translate(batch)
-
             request += 1
+
+            # build a batch of random sentences
+            batch = ""
+            for line in random.sample(lines, args.batch_size):
+                batch += line.decode('utf-8') if sys.version_info < (3, 0) else line
+
+            # translate the batch
+            translate(batch)
 
     if args.connect_per == 'process':
         close()
@@ -87,12 +84,12 @@ if __name__ == "__main__":
     # read text lines
     lines = sys.stdin.readlines()
 
-    print(f"Launching {args.processes} processes with {args.requests} requests each; connecting per {args.connect_per}.")
+    print(f"Launching {args.processes} processes; each process will send {args.requests} requests of {args.batch_size} sentences; connecting per {args.connect_per}.")
 
     # create child processes
     processes = [Process(target=run, args=(args, lines)) for _ in range(args.processes)]
 
-    with Timer(('-' * 40) + '\n' + f"Translated total {args.processes * args.requests} requests of {args.batch_size} sentences each"):
+    with Timer(lambda ms: ('-' * 80) + '\n' + f"Translated total {args.processes * args.requests} requests of {args.batch_size} sentences each in {ms} ms ({(float(args.processes * args.requests * args.batch_size) / (float(ms) / 1000.0)):.2f} sentences/second)", timestamp=False):
         # start all processes
         for process in processes:
             process.start()
