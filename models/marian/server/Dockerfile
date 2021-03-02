@@ -60,4 +60,4 @@ RUN ./run-me.sh
 EXPOSE 8888
 
 # run the server
-ENTRYPOINT ["/marian/build/marian-server", "--port", "8888", "-m", "model/model.npz", "-v", "model/vocab.en.yml", "-v", "model/vocab.ro.yml"]
+ENTRYPOINT ["/marian/build/marian-server", "--port", "8888", "-m", "model/model.npz", "-v", "model/vocab.en.yml", "-v", "model/vocab.ro.yml", "--mini-batch", "5"]
