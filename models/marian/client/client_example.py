@@ -11,9 +11,10 @@ from multiprocessing import Process
 from websocket import create_connection
 
 class Timer:
-    def __init__(self, msg, timestamp=True):
+    def __init__(self, msg, timestamp=True, active=True):
         self._msg = msg
         self._timestamp = timestamp
+        self._active = active
 
     def __enter__(self):
         self._start = datetime.datetime.now()
@@ -24,7 +25,9 @@ class Timer:
         msg = f"{self._msg} in {ms} ms" if isinstance(self._msg, str) else self._msg(ms)
         if self._timestamp:
             msg = f"{end.strftime('%H:%M:%S.%f')[:-3]}\t{msg}"
-        print(msg)
+
+        if self._active:
+            print(msg)
 
 def run(args, lines):
     ws = None
@@ -46,7 +49,7 @@ def run(args, lines):
         if args.connect_per == 'request':
             connect()
 
-        with Timer(f"Process (pid {os.getpid()}) translated a single request of {args.batch_size} sentences"):
+        with Timer(f"Process (pid {os.getpid()}) translated a single request of {args.sentences} sentences", active=args.verbose):
             ws.send(batch)
             result = ws.recv()
             # print(result.rstrip())
@@ -54,14 +57,14 @@ def run(args, lines):
         if args.connect_per == 'request':
             close()
 
-    with Timer(f"** Process (pid {os.getpid()}) translated {args.requests} requests"):
+    with Timer(f"** Process (pid {os.getpid()}) translated {args.requests} requests", active=args.verbose):
         request = 0
         while request < args.requests or args.requests == -1:
             request += 1
 
             # build a batch of random sentences
             batch = ""
-            for line in random.sample(lines, args.batch_size):
+            for line in random.sample(lines, args.sentences):
                 batch += line.decode('utf-8') if sys.version_info < (3, 0) else line
 
             # translate the batch
@@ -75,21 +78,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--hostname", type=str, default="localhost")
     parser.add_argument("-p", "--port", type=int, default=8888)
-    parser.add_argument("-b", "--batch-size", type=int, default=5)
+    parser.add_argument("-b", "--sentences", type=int, default=5)
     parser.add_argument("--processes", type=int, default=5)
     parser.add_argument("--requests", type=int, default=20)
     parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
+    parser.add_argument("--verbose", action='store_true')
     args = parser.parse_args()
 
     # read text lines
     lines = sys.stdin.readlines()
 
-    print(f"Launching {args.processes} processes; each process will send {args.requests} requests of {args.batch_size} sentences; connecting per {args.connect_per}.")
+    if args.verbose:
+        print(f"Launching {args.processes} processes; each process will send {args.requests} requests of {args.sentences} sentences; connecting per {args.connect_per}.")
 
     # create child processes
     processes = [Process(target=run, args=(args, lines)) for _ in range(args.processes)]
 
-    with Timer(lambda ms: ('-' * 80) + '\n' + f"Translated total {args.processes * args.requests} requests of {args.batch_size} sentences each in {ms} ms ({(float(args.processes * args.requests * args.batch_size) / (float(ms) / 1000.0)):.2f} sentences/second)", timestamp=False):
+    with Timer(lambda ms: f"Translated total {args.processes * args.requests} requests of {args.sentences} sentences each in {ms} ms ({(float(args.processes * args.requests * args.sentences) / (float(ms) / 1000.0)):.2f} sentences/second)", timestamp=False):
         # start all processes
         for process in processes:
             process.start()
