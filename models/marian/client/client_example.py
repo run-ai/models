@@ -11,23 +11,21 @@ from multiprocessing import Process
 from websocket import create_connection
 
 class Timer:
-    def __init__(self, msg, timestamp=True, active=True):
+    def __init__(self, msg, active=True):
         self._msg = msg
-        self._timestamp = timestamp
         self._active = active
 
     def __enter__(self):
         self._start = datetime.datetime.now()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        end = datetime.datetime.now()
-        ms = int((end - self._start).total_seconds() * 1000)
-        msg = f"{self._msg} in {ms} ms" if isinstance(self._msg, str) else self._msg(ms)
-        if self._timestamp:
-            msg = f"{end.strftime('%H:%M:%S.%f')[:-3]}\t{msg}"
-
         if self._active:
-            print(msg)
+            end = datetime.datetime.now()
+            ms = int((end - self._start).total_seconds() * 1000)
+            if isinstance(self._msg, str):
+                print(f"{end.strftime('%H:%M:%S.%f')[:-3]}\t{self._msg} in {ms} ms")
+            else:
+                self._msg(ms)
 
 def run(args, lines):
     ws = None
@@ -94,7 +92,29 @@ if __name__ == "__main__":
     # create child processes
     processes = [Process(target=run, args=(args, lines)) for _ in range(args.processes)]
 
-    with Timer(lambda ms: f"Translated total {args.processes * args.requests} requests of {args.sentences} sentences each in {ms} ms ({(float(args.processes * args.requests * args.sentences) / (float(ms) / 1000.0)):.2f} sentences/second)", timestamp=False):
+    def summary(total_ms):
+        # total
+        total_seconds = float(total_ms) / 1000.0
+        total_requests = args.processes * args.requests
+        total_sentences = total_requests * args.sentences
+        print(f"Translated total {total_requests} requests of {args.sentences} sentences each from {args.processes} processes (total {total_sentences} sentences)")
+        print(f"Total time: {total_ms} ms")
+
+        # avg latency
+        latency_request = total_ms / float(total_requests)
+        latency_sentence = total_ms / float(total_sentences)
+        print("Average latency:")
+        print(f"  Request: {latency_request:.2f} ms")
+        print(f"  Sentence: {latency_sentence:.2f} ms")
+
+        # throughput
+        throughput_requests = float(total_requests) / total_seconds
+        throughput_sentences = float(total_sentences) / total_seconds
+        print("Throughput:")
+        print(f"  {throughput_requests:.2f} requests/second")
+        print(f"  {throughput_sentences:.2f} sentences/second")
+
+    with Timer(summary):
         # start all processes
         for process in processes:
             process.start()
