@@ -19,4 +19,4 @@ You can pass the following arguments:
 - `--requests` - The number of requests to be sent from each process; can be multiple values; default is 20.
 - `--sentences` - The number of sentences to be translated in each request; can be multiple values; default is 5.
 - `--connect-per` (options: `process`, `request`) - Create a socket once per process or for every request; default is `request`.
-- `--verbose` - Print verbose messages.
+- `--output` - (options: `text`, `verbose`, `csv`) - Output format; default is `text`.

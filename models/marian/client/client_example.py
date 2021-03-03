@@ -27,7 +27,7 @@ class Timer:
             else:
                 self._msg(ms)
 
-def run(lines, hostname, port, requests, sentences, connect_per, verbose):
+def run(lines, hostname, port, requests, sentences, connect_per, output):
     ws = None
 
     def connect():
@@ -47,7 +47,7 @@ def run(lines, hostname, port, requests, sentences, connect_per, verbose):
         if connect_per == 'request':
             connect()
 
-        with Timer(f"Process (pid {os.getpid()}) translated a single request of {sentences} sentences", active=verbose):
+        with Timer(f"Process (pid {os.getpid()}) translated a single request of {sentences} sentences", active=(output == 'verbose')):
             ws.send(batch)
             result = ws.recv()
             # print(result.rstrip())
@@ -55,7 +55,7 @@ def run(lines, hostname, port, requests, sentences, connect_per, verbose):
         if connect_per == 'request':
             close()
 
-    with Timer(f"** Process (pid {os.getpid()}) translated {requests} requests", active=verbose):
+    with Timer(f"** Process (pid {os.getpid()}) translated {requests} requests", active=(output == 'verbose')):
         request = 0
         while request < requests or requests == -1:
             request += 1
@@ -71,39 +71,47 @@ def run(lines, hostname, port, requests, sentences, connect_per, verbose):
     if connect_per == 'process':
         close()
 
+def calculate_metrics(total_ms):
+    total_seconds = float(total_ms) / 1000.0
+    total_requests = processes * requests
+    total_sentences = total_requests * sentences
+
+    # avg latency
+    latency_request = total_ms / float(total_requests)
+    latency_sentence = total_ms / float(total_sentences)
+
+    # throughput
+    throughput_requests = float(total_requests) / total_seconds
+    throughput_sentences = float(total_sentences) / total_seconds
+
+    return total_requests, total_sentences, latency_request, latency_sentence, throughput_requests, throughput_sentences
+
 def impl(lines, processes, requests, sentences, args):
-    if args.verbose:
+    if args.output == 'verbose':
         print(f"Launching {processes} processes; each process will send {requests} requests of {sentences} sentences; connecting per {args.connect_per}.")
 
     # create child processes
-    ps = [Process(target=run, args=(lines, args.hostname, args.port, requests, sentences, args.connect_per, args.verbose)) for _ in range(processes)]
+    ps = [Process(target=run, args=(lines, args.hostname, args.port, requests, sentences, args.connect_per, args.output)) for _ in range(processes)]
 
-    def summary(total_ms):
-        # spacer
+    def text(total_ms):
+        total_requests, total_sentences, latency_request, latency_sentence, throughput_requests, throughput_sentences = calculate_metrics(total_ms)
+
         print('-' * 100)
-
-        # total
-        total_seconds = float(total_ms) / 1000.0
-        total_requests = processes * requests
-        total_sentences = total_requests * sentences
         print(f"Translated total {total_requests} requests of {sentences} sentences each from {processes} processes (total {total_sentences} sentences)")
         print(f"Total time: {total_ms} ms")
-
-        # avg latency
-        latency_request = total_ms / float(total_requests)
-        latency_sentence = total_ms / float(total_sentences)
         print("Average latency:")
         print(f"  Request: {latency_request:.2f} ms")
         print(f"  Sentence: {latency_sentence:.2f} ms")
-
-        # throughput
-        throughput_requests = float(total_requests) / total_seconds
-        throughput_sentences = float(total_sentences) / total_seconds
         print("Throughput:")
         print(f"  {throughput_requests:.2f} requests/second")
         print(f"  {throughput_sentences:.2f} sentences/second")
 
-    with Timer(summary):
+    def csv(total_ms):
+        values = [processes, requests, sentences]
+        values.extend(calculate_metrics(total_ms))
+        print(','.join([str(_) for _ in values]))
+
+    with Timer(csv if args.output == 'csv' else text):
         # start all processes
         for process in ps:
             process.start()
@@ -121,11 +129,14 @@ if __name__ == "__main__":
     parser.add_argument("--requests", type=int, default=[20], nargs='*')
     parser.add_argument("--sentences", type=int, default=[5], nargs='*')
     parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
-    parser.add_argument("--verbose", action='store_true')
+    parser.add_argument("--output", choices=['text', 'verbose', 'csv'], default='text')
     args = parser.parse_args()
 
     # read text lines
     lines = sys.stdin.readlines()
+
+    if args.output == 'csv':
+        print(','.join(['Processes', 'Requests', 'Sentences', 'Total requests', 'Total sentences', 'Avg. request latency', 'Avg. sentence latency', 'Request throughput', 'Sentence throughput']))
 
     for processes in args.processes:
         for requests in args.requests:
