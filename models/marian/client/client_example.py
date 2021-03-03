@@ -27,77 +27,66 @@ class Timer:
             else:
                 self._msg(ms)
 
-def run(args, lines):
+def run(lines, hostname, port, requests, sentences, connect_per, verbose):
     ws = None
 
     def connect():
         nonlocal ws
-        ws = create_connection("ws://{}:{}/translate".format(args.hostname, args.port))
+        ws = create_connection("ws://{}:{}/translate".format(hostname, port))
 
     def close():
         nonlocal ws
         ws.close()
 
-    if args.connect_per == 'process':
+    if connect_per == 'process':
         connect()
 
     def translate(batch):
         nonlocal ws
 
-        if args.connect_per == 'request':
+        if connect_per == 'request':
             connect()
 
-        with Timer(f"Process (pid {os.getpid()}) translated a single request of {args.sentences} sentences", active=args.verbose):
+        with Timer(f"Process (pid {os.getpid()}) translated a single request of {sentences} sentences", active=verbose):
             ws.send(batch)
             result = ws.recv()
             # print(result.rstrip())
 
-        if args.connect_per == 'request':
+        if connect_per == 'request':
             close()
 
-    with Timer(f"** Process (pid {os.getpid()}) translated {args.requests} requests", active=args.verbose):
+    with Timer(f"** Process (pid {os.getpid()}) translated {requests} requests", active=verbose):
         request = 0
-        while request < args.requests or args.requests == -1:
+        while request < requests or requests == -1:
             request += 1
 
             # build a batch of random sentences
             batch = ""
-            for line in random.sample(lines, args.sentences):
+            for line in random.sample(lines, sentences):
                 batch += line.decode('utf-8') if sys.version_info < (3, 0) else line
 
             # translate the batch
             translate(batch)
 
-    if args.connect_per == 'process':
+    if connect_per == 'process':
         close()
 
-if __name__ == "__main__":
-    # handle command-line options
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--hostname", type=str, default="localhost")
-    parser.add_argument("-p", "--port", type=int, default=8888)
-    parser.add_argument("-b", "--sentences", type=int, default=5)
-    parser.add_argument("--processes", type=int, default=5)
-    parser.add_argument("--requests", type=int, default=20)
-    parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
-    parser.add_argument("--verbose", action='store_true')
-    args = parser.parse_args()
-
-    # read text lines
-    lines = sys.stdin.readlines()
-
+def impl(lines, processes, requests, sentences, args):
     if args.verbose:
-        print(f"Launching {args.processes} processes; each process will send {args.requests} requests of {args.sentences} sentences; connecting per {args.connect_per}.")
+        print(f"Launching {processes} processes; each process will send {requests} requests of {sentences} sentences; connecting per {args.connect_per}.")
 
     # create child processes
-    processes = [Process(target=run, args=(args, lines)) for _ in range(args.processes)]
+    ps = [Process(target=run, args=(lines, args.hostname, args.port, requests, sentences, args.connect_per, args.verbose)) for _ in range(processes)]
 
     def summary(total_ms):
+        # spacer
+        print('-' * 100)
+
         # total
         total_seconds = float(total_ms) / 1000.0
-        total_requests = args.processes * args.requests
-        total_sentences = total_requests * args.sentences
-        print(f"Translated total {total_requests} requests of {args.sentences} sentences each from {args.processes} processes (total {total_sentences} sentences)")
+        total_requests = processes * requests
+        total_sentences = total_requests * sentences
+        print(f"Translated total {total_requests} requests of {sentences} sentences each from {processes} processes (total {total_sentences} sentences)")
         print(f"Total time: {total_ms} ms")
 
         # avg latency
@@ -116,9 +105,29 @@ if __name__ == "__main__":
 
     with Timer(summary):
         # start all processes
-        for process in processes:
+        for process in ps:
             process.start()
 
         # wait for all processes
-        for process in processes:
+        for process in ps:
             process.join()
+
+if __name__ == "__main__":
+    # handle command-line options
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hostname", type=str, default="localhost")
+    parser.add_argument("--port", type=int, default=8888)
+    parser.add_argument("--processes", type=int, default=[5], nargs='*')
+    parser.add_argument("--requests", type=int, default=[20], nargs='*')
+    parser.add_argument("--sentences", type=int, default=[5], nargs='*')
+    parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
+    parser.add_argument("--verbose", action='store_true')
+    args = parser.parse_args()
+
+    # read text lines
+    lines = sys.stdin.readlines()
+
+    for processes in args.processes:
+        for requests in args.requests:
+            for sentences in args.sentences:
+                impl(lines, processes, requests, sentences, args)
