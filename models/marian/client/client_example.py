@@ -27,7 +27,9 @@ class Timer:
             else:
                 self._msg(ms)
 
-def run(lines, hostname, port, requests, sentences, connect_per, output):
+def run(lines, hostname, port, requests, sentences, connect_per, output, seed):
+    random.seed(args.seed)
+
     ws = None
 
     def connect():
@@ -91,7 +93,7 @@ def impl(lines, processes, requests, sentences, args):
         print(f"Launching {processes} processes; each process will send {requests} requests of {sentences} sentences; connecting per {args.connect_per}.")
 
     # create child processes
-    ps = [Process(target=run, args=(lines, args.hostname, args.port, requests, sentences, args.connect_per, args.output)) for _ in range(processes)]
+    ps = [Process(target=run, args=(lines, args.hostname, args.port, requests, sentences, args.connect_per, args.output, args.seed)) for _ in range(processes)]
 
     def text(total_ms):
         total_requests, total_sentences, latency_request, latency_sentence, throughput_requests, throughput_sentences = calculate_metrics(total_ms)
@@ -130,10 +132,11 @@ if __name__ == "__main__":
     parser.add_argument("--sentences", type=int, default=[5], nargs='*')
     parser.add_argument("--connect-per", choices=['process', 'request'], default='request')
     parser.add_argument("--output", choices=['text', 'verbose', 'csv'], default='text')
+    parser.add_argument("--seed", type=int, default=None)
     args = parser.parse_args()
 
     # read text lines
-    lines = sys.stdin.readlines()
+    lines = [line.strip() for line in sys.stdin.readlines() if len(line) > 0]
 
     if args.output == 'csv':
         print(','.join(['Processes', 'Requests', 'Sentences', 'Total requests', 'Total sentences', 'Avg. request latency', 'Avg. sentence latency', 'Request throughput', 'Sentence throughput']))

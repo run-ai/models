@@ -20,3 +20,4 @@ You can pass the following arguments:
 - `--sentences` - The number of sentences to be translated in each request; can be multiple values; default is 5.
 - `--connect-per` (options: `process`, `request`) - Create a socket once per process or for every request; default is `request`.
 - `--output` - (options: `text`, `verbose`, `csv`) - Output format; default is `text`.
+- `--seed` - Optional; Set the randomness seed.
