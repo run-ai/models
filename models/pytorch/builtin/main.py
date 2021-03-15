@@ -12,6 +12,8 @@ def parse_args():
                         help='neural network to use (default: resnet50)')
     parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                         help='batch size for training (default: 128)')
+    parser.add_argument('--image-size', type=int, default=32, metavar='N',
+                        help='image size (default: 32)')
     parser.add_argument('--samples', type=int, default=0, metavar='N',
                         help='number of samples to use from the train dataset (default: all)')
     parser.add_argument('--test-batch-size', type=int, default=128, metavar='N',
@@ -32,8 +34,7 @@ def parse_args():
 def create_train_loader(args, **kwargs):
     train_dataset = datasets.CIFAR10('/workload', train=True, download=False,
         transform=transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
+            transforms.Resize((args.image_size, args.image_size)),
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]))
