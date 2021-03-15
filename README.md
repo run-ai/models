@@ -5,6 +5,7 @@
 | Name | Framework |
 |-|-|
 | [Keras Builtin](models/keras/builtin) | Keras + TF |
+| [PyTorch Builtin](models/pytorch/builtin) | PyTorch |
 
 ## Inference Models
 
