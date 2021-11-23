@@ -1,4 +1,5 @@
 import argparse
+import gc
 import os
 import time
 
@@ -29,7 +30,6 @@ def parse_args():
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
     return parser.parse_args()
-
 
 def create_train_loader(args, **kwargs):
     train_dataset = datasets.CIFAR10('/workload', train=True, download=False,
@@ -81,6 +81,8 @@ def train(args, model, train_loader, optimizer, epoch):
     total = 0
     correct = 0
 
+    empty_cache_on = 'RUNAI_PYTORCH_EMPTY_CACHE' in os.environ and int(os.environ['RUNAI_PYTORCH_EMPTY_CACHE']) == 1
+
     loss_fn = torch.nn.CrossEntropyLoss()
 
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -99,6 +101,13 @@ def train(args, model, train_loader, optimizer, epoch):
 
         end = time.perf_counter()
         print(f"Step {batch_idx + 1} took {end - start:0.3f} seconds")
+
+        if empty_cache_on:
+            start_empty = time.perf_counter()
+            torch.cuda.empty_cache()
+            gc.collect()
+            end_empty = time.perf_counter()
+            print(f"empty cache took {end_empty - start_empty:0.3f} seconds")
 
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f} | Acc: {:.3}% ({}/{})'.format(
