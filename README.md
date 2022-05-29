@@ -1,11 +1,12 @@
-# Run:AI Model Zoo
+# Run:ai Model Zoo
 
 ## Training Models
 
-| Name | Framework |
-|-|-|
-| [Keras Builtin](models/keras/builtin) | Keras + TF |
-| [PyTorch Builtin](models/pytorch/builtin) | PyTorch |
+| Name | Framework | Docker Image |
+|-|-|-|
+| [Keras Builtin](models/keras/builtin) | Keras + TF | runai/example-tf-keras-builtin |
+| [PyTorch Builtin](models/pytorch/builtin) | PyTorch | runai/example-pytorch-builtin |
+| [PyTorch Builtin over SSH](models/pytorch/builtin/ssh) | PyTorch | runai/example-pytorch-builtin-ssh |
 
 ## Inference Models
 
