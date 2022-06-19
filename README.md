@@ -14,3 +14,4 @@
 |-|-|
 | [Marian](models/marian) | [Marian NMT](https://marian-nmt.github.io/) |
 | [Triton](models/triton) | [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server/) |
+| [T5](models/pytorch/huggingface-t5) | PyTorch + huggingface) |
