@@ -10,13 +10,12 @@ We wrapped vLLM library and server as a dockerfile ready-to-use and easy to mana
 
 ## Building the Docker image
 ```
-docker build -t run-ai/vllm-builder -f Dockerfile.dev .
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock run-ai/vllm-builder <HF_MODEL>
+docker build --build-arg ORGANIZATION=NousResearch --build-arg MODEL=Llama-2-7b-chat-hf -t run-ai/vllm:Llama-2-7b-chat-hf .
 ```
 
 ## Running the Docker image
 ```
-docker run --rm --gpus all -p 8000:8000 run-ai/vllm:<MODEL>
+docker run --rm --gpus all -p 8000:8000 run-ai/vllm:Llama-2-7b-chat-hf
 ```
 
 ## Usage

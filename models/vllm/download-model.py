@@ -11,7 +11,6 @@ def download_and_save_model(model_name):
 
     model.save_pretrained(save_directory)
     tokenizer.save_pretrained(save_directory)
-    return save_directory
 
 def build_docker_image(model):
     docker_build_command = f"docker build --build-arg MODEL={model} -t run-ai/vllm:{model} ."
@@ -25,7 +24,5 @@ if __name__ == "__main__":
     parser.add_argument("model_name", type=str, help="Hugging Face model name")
 
     args = parser.parse_args()
-    saved_model_path = download_and_save_model(args.model_name)
-    build_docker_image(saved_model_path)
-    delete_model_directory(saved_model_path)
+    download_and_save_model(args.model_name)
 
