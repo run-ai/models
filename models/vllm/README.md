@@ -17,6 +17,9 @@ Default target is building the app. For building the server add `--target server
 ```
 docker build --build-arg ORGANIZATION=NousResearch --build-arg MODEL=Llama-2-7b-chat-hf -t run-ai/vllm:Llama-2-7b-chat-hf .
 ```
+Optional build args:
+* `TOKENIZER_ORGANIZATION` + `TOKENIZER` - To use different tokenizer than the model
+
 
 ## Running the Docker image
 Running the application is done with the following command:
