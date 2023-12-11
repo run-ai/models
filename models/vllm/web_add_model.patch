@@ -1,0 +1,23 @@
+--- openai.ts		2023-12-10 07:30:38.000000000 +0000
++++ openai-patch.ts	2023-12-10 08:02:35.677543729 +0000
+@@ -12,6 +12,7 @@
+   GPT_3_5_AZ = 'gpt-35-turbo',
+   GPT_4 = 'gpt-4',
+   GPT_4_32K = 'gpt-4-32k',
++  ADD_MODEL = '<MODEL_NAME>',
+ }
+
+ // in case the `DEFAULT_MODEL` environment variable is not set or set to an unsupported model
+@@ -24,6 +25,12 @@
+     maxLength: 12000,
+     tokenLimit: 4000,
+   },
++  [OpenAIModelID.ADD_MODEL]: {
++    id: OpenAIModelID.ADD_MODEL,
++    name: '<MODEL_NAME>',
++    maxLength: <MODEL_MAX_LENGTH>,
++    tokenLimit: <MODEL_TOKEN_LIMIT>,
++  },
+   [OpenAIModelID.GPT_3_5_AZ]: {
+     id: OpenAIModelID.GPT_3_5_AZ,
+     name: 'GPT-3.5',
