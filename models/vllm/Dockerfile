@@ -1,6 +1,8 @@
 FROM ubuntu:22.04 as builder
 ARG ORGANIZATION
 ARG MODEL
+ARG TOKENIZER_ORGANIZATION=${ORGANIZATION}
+ARG TOKENIZER=${MODEL}
 
 RUN apt-get update -y \
     && apt-get install -y python3 \
@@ -14,7 +16,7 @@ ADD download-model.py download-model.py
 ADD requirements.txt requirements.txt
 
 RUN pip3 install -r requirements.txt
-RUN python3 download-model.py ${ORGANIZATION}/${MODEL}
+RUN python3 download-model.py ${ORGANIZATION}/${MODEL} ${TOKENIZER_ORGANIZATION}/${TOKENIZER}
 
 
 FROM vllm/vllm-openai:v0.2.2 as server

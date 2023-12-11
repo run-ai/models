@@ -3,11 +3,11 @@ import shutil
 import argparse
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def download_and_save_model(model_name):
+def download_and_save_model(model_name, tokenizer_name):
     save_directory = model_name.split('/')[-1]
     
     model = AutoModelForCausalLM.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     model.save_pretrained(save_directory)
     tokenizer.save_pretrained(save_directory)
@@ -22,7 +22,8 @@ def delete_model_directory(model_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build dokcer image runs vLLM server with specified model cached.")
     parser.add_argument("model_name", type=str, help="Hugging Face model name")
+    parser.add_argument("tokenizer_name", type=str, help="Hugging Face tokenizer name")
 
     args = parser.parse_args()
-    download_and_save_model(args.model_name)
+    download_and_save_model(args.model_name, args.tokenizer_name)
 
