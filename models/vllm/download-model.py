@@ -2,14 +2,14 @@ import os
 import shutil
 import argparse
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from huggingface_hub import snapshot_download
 
 def download_and_save_model(model_name, tokenizer_name):
     save_directory = model_name.split('/')[-1]
-    
-    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    snapshot_download(model_name, local_dir=save_directory, ignore_patterns=["*.bin"])
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
-    model.save_pretrained(save_directory)
     tokenizer.save_pretrained(save_directory)
 
 def build_docker_image(model):
@@ -26,4 +26,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     download_and_save_model(args.model_name, args.tokenizer_name)
-
