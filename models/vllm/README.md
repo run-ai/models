@@ -19,6 +19,7 @@ docker build --build-arg ORGANIZATION=NousResearch --build-arg MODEL=Llama-2-7b-
 ```
 Optional build args:
 * `TOKENIZER_ORGANIZATION` + `TOKENIZER` - To use different tokenizer than the model
+* `SAFETENSORS_ONLY=True` - Weather to download only safetensors weight only (Reduce image size)
 
 
 ## Running the Docker image
