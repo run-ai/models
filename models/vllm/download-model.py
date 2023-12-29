@@ -7,7 +7,7 @@ from huggingface_hub import snapshot_download
 def download_and_save_model(model_name, tokenizer_name, exclude_pytorch_weight):
     save_directory = model_name.split('/')[-1]
 
-    exclude_patterns = []
+    exclude_patterns = ["coreml/*"]
     if exclude_pytorch_weight:
         exclude_patterns.append("*.bin")
     snapshot_download(model_name, local_dir=save_directory, local_dir_use_symlinks=False, ignore_patterns=exclude_patterns)
