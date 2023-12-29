@@ -41,9 +41,9 @@ RUN apt-get update -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workdir
-RUN git clone https://github.com/mckaywrigley/chatbot-ui \
+RUN git clone https://github.com/run-ai/chatbot-ui \
     && cd chatbot-ui \
-    && git reset --hard 138950c
+    && git reset --hard 11fb669
 RUN rm -rf .git
 
 ADD web_add_model.patch web_add_model.patch
