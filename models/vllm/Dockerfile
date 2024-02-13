@@ -62,7 +62,7 @@ ENV OPENAI_API_HOST=http://localhost:8000
 ENV DEFAULT_MODEL=${MODEL}
 
 RUN apt-get update -y \
-    && apt-get install -y curl \
+    && apt-get install -y curl tini \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -76,4 +76,4 @@ RUN npm i --prefix chatbot-ui
 EXPOSE 3000
 COPY app.sh app.sh
 RUN chmod +x app.sh
-ENTRYPOINT ["bash", "-c", "./app.sh"]
+ENTRYPOINT ["tini", "--", "bash", "-c", "./app.sh"]
