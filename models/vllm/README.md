@@ -25,10 +25,12 @@ Optional build args:
 ## Running the Docker image
 Running the application is done with the following command:
 ```
-docker run --rm --gpus all -p 3000:3000 -p 5000:5000 run-ai/vllm:Llama-2-7b-chat-hf
+docker run --rm --gpus all -p 3000:3000 -p 3001:3001 run-ai/vllm:Llama-2-7b-chat-hf
 ```
-To run the server only image change the port to 8000, and dont expose port 5000.
+To run the server only image change the port to 8000, and dont expose port 3001.
 
+
+If you wish to run the readiness server on different port than 3001, you can specify it with `-e READINESS_PORT=PORT`
 ## Usage
 
 Using the model for completion example with server image:
@@ -44,5 +46,5 @@ http://localhost:3000
 ### Readiness
 When running the app, you can check the readiness of the application with the following request:
 ```
-curl http://localhost:5000/ready
+curl http://localhost:3001/ready
 ```
