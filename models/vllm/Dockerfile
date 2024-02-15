@@ -66,12 +66,18 @@ RUN apt-get update -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+COPY requirements.ready requirements.ready
+RUN pip install -r requirements.ready
+
 SHELL ["/bin/bash", "--login", "-i", "-c"]
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 RUN source /root/.bashrc && nvm install --lts
 
 COPY --from=app_builder /workdir/chatbot-ui chatbot-ui
 RUN npm i --prefix chatbot-ui
+
+COPY ready.py ready.py
+EXPOSE 5000
 
 EXPOSE 3000
 COPY app.sh app.sh
