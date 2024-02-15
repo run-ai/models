@@ -25,9 +25,9 @@ Optional build args:
 ## Running the Docker image
 Running the application is done with the following command:
 ```
-docker run --rm --gpus all -p 3000:3000 run-ai/vllm:Llama-2-7b-chat-hf
+docker run --rm --gpus all -p 3000:3000 -p 5000:5000 run-ai/vllm:Llama-2-7b-chat-hf
 ```
-To run the server only image change the port to 8000.
+To run the server only image change the port to 8000, and dont expose port 5000.
 
 ## Usage
 
@@ -39,4 +39,10 @@ curl http://localhost:8000/v1/completions -H "Content-Type: application/json" -d
 Using the application with the app image browse to:
 ```
 http://localhost:3000
+```
+
+### Readiness
+When running the app, you can check the readiness of the application with the following request:
+```
+curl http://localhost:5000/ready
 ```
