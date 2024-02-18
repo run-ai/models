@@ -17,7 +17,7 @@ There are 2 main targets for build:
 For building the Server only run the following command:
 ```
 docker build \
-		-f Dockerfile/server.Dockerfile \
+		-f Dockerfile/weights-server.Dockerfile \
 		--build-arg ORGANIZATION=NousResearch \
 		--build-arg MODEL=Llama-2-7b-chat-hf \
 		-t server .
