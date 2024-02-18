@@ -62,3 +62,9 @@ When running the app, you can check the readiness of the application with the fo
 ```
 curl http://localhost:3001/ready
 ```
+
+## RunAI LLM Images
+To build and push RunAI models images you can run:
+```
+make all
+```
