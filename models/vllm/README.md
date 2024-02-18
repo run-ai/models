@@ -13,14 +13,28 @@ There are 2 main targets for build:
 * Server (Server only exposed at port 8000)
 * App (Includes frontend application exposed at port 3000)
 
-Default target is building the app. For building the server add `--target server` to the following command:
+### Server Only
+For building the Server only run the following command:
 ```
-docker build --build-arg ORGANIZATION=NousResearch --build-arg MODEL=Llama-2-7b-chat-hf -t run-ai/vllm:Llama-2-7b-chat-hf .
+docker build \
+		-f Dockerfile/server.Dockerfile \
+		--build-arg ORGANIZATION=NousResearch \
+		--build-arg MODEL=Llama-2-7b-chat-hf \
+		-t server .
 ```
+
 Optional build args:
 * `TOKENIZER_ORGANIZATION` + `TOKENIZER` - To use different tokenizer than the model
 * `SAFETENSORS_ONLY=True` - Weather to download only safetensors weight only (Reduce image size)
 
+### Application
+For building also the application run the following command after building the server:
+```
+docker build \
+		-f Dockerfile/app.Dockerfile \
+		--build-arg MODEL=Llama-2-7b-chat-hf \
+		-t run-ai/vllm:Llama-2-7b-chat-hf .
+```
 
 ## Running the Docker image
 Running the application is done with the following command:
