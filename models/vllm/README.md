@@ -27,6 +27,9 @@ Optional build args:
 * `TOKENIZER_ORGANIZATION` + `TOKENIZER` - To use different tokenizer than the model
 * `SAFETENSORS_ONLY=True` - Weather to download only safetensors weight only (Reduce image size)
 
+> [!NOTE]
+> For building an weightless server use Dockerfile/weightless-server.Dockerfile instead
+
 ### Application
 For building also the application run the following command after building the server:
 ```
@@ -42,6 +45,9 @@ Running the application is done with the following command:
 docker run --rm --gpus all -p 3000:3000 -p 3001:3001 run-ai/vllm:Llama-2-7b-chat-hf
 ```
 To run the server only image change the port to 8000, and dont expose port 3001.
+
+> [!IMPORTANT]
+> For weightless image make sure you set `MODEL_NAME_OR_PATH` env var with HF model name or a path mounted to the container using `-v`
 
 
 If you wish to run the readiness server on different port than 3001, you can specify it with `-e READINESS_PORT=PORT`
