@@ -23,8 +23,9 @@ RUN python3 download-model.py ${ORGANIZATION}/${MODEL} ${TOKENIZER_ORGANIZATION}
 FROM vllm/vllm-openai:v0.2.2 as server
 ARG MODEL
 ENV NAME=${MODEL}
+ENV MODEL_NAME_OR_PATH=/model
 
 COPY --from=builder /workdir/${MODEL} /model
 
 EXPOSE 8000
-ENTRYPOINT ["sh", "-c", "python3 -m vllm.entrypoints.openai.api_server --model /model --served-model-name ${NAME}"]
+ENTRYPOINT ["sh", "-c", "python3 -m vllm.entrypoints.openai.api_server --model ${MODEL_NAME_OR_PATH} --served-model-name ${NAME}"]
