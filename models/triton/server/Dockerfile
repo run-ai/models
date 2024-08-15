@@ -8,4 +8,4 @@ RUN cd / && \
 # expose the HTTP port
 EXPOSE 8000
 
-ENTRYPOINT ["/opt/tritonserver/nvidia_entrypoint.sh", "tritonserver", "--model-repository", "/triton-inference-server/docs/examples/model_repository"]
+ENTRYPOINT ["/opt/nvidia/nvidia_entrypoint.sh", "tritonserver", "--model-repository", "/triton-inference-server/docs/examples/model_repository"]
