@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker push runai/example-triton-server
+docker push gcr.io/run-ai-demo/example-triton-server
