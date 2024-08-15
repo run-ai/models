@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/tritonserver:20.12-py3
+FROM nvcr.io/nvidia/tritonserver:24.07-py3
 
 RUN cd / && \
     git clone https://github.com/triton-inference-server/server.git triton-inference-server && \
