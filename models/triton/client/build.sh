@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build -t runai/example-triton-client -f Dockerfile .
+docker build -t runai.jfrog.io/demo/example-triton-client -f Dockerfile .
