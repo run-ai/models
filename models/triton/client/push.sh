@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker push runai/example-triton-client
+docker push runai.jfrog.io/demo/example-triton-client
