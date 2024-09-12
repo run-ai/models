@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker push runai/example-marian-server
+docker push runai.jfrog.io/demo/example-marian-server
