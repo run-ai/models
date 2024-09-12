@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker build -t runai/example-marian-server -f Dockerfile .
+docker build -t runai.jfrog.io/demo/example-marian-server -f Dockerfile .
