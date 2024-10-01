@@ -5,6 +5,10 @@ RUN cd / && \
     cd /triton-inference-server/docs/examples && \
     ./fetch_models.sh
 
+# Fix the Permissions Issue
+RUN chown -R root:root /triton-inference-server/docs/examples/model_repository && \
+    chmod 644 /triton-inference-server/docs/examples/model_repository/inception_graphdef/1/model.graphdef
+
 # expose the HTTP port
 EXPOSE 8000
 
